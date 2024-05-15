@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Background Image Behind iFrame</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-image: url('slides.png'); /* Replace 'background.jpg' with your image path */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    #iframeContainer {
+        position: relative;
+        width: 800px; /* Set the width of the iframe container */
+        height: 600px; /* Set the height of the iframe container */
+        margin: 50px auto; /* Adjust margin to position the iframe container */
+    }
+    
+    iframe {
+        position: absolute;
+        top: 17%; /* Adjust top position of the iframe */
+        left: 15%; /* Adjust left position of the iframe */
+        width: 100%; /* Set the width of the iframe */
+        height: 75%; /* Set the height of the iframe */
+        border: none; /* Remove iframe border */
+    }
+</style>
+</head>
+<body>
+    <div id="iframeContainer">
+        <iframe id="myIframe" src=""></iframe> <!-- Leave src empty initially -->
+    </div>
+
+    <script>
+        function openPopup() {
+            var url = prompt("Enter the URL for the iframe:", "https://www.example.com");
+            if (url !== null) {
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url; // Add "https://" if missing
+                }
+                document.getElementById("myIframe").src = url;
+            }
+        }
+        window.onload = openPopup; // Automatically open the popup on page load
+    </script>
+</body>
+</html>
