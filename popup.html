@@ -7,20 +7,19 @@
 </head>
 <body>
     <h1>Main Page</h1>
-    <label for="url">Enter URL:</label>
-    <input type="text" id="url" placeholder="https://www.example.com">
     <button onclick="openPopup()">Open Popup</button>
 
     <script>
         // List of URLs to block
         const blockedUrls = [
             "*://*.ads.com/*",
-            "*://*.trackers.com/*"
+            "*://*.trackers.com/*",
+            "chrome-extension://jbldkhfglmgeihlcaeliadhipokhocnm/*"
         ];
 
         // Function to block URLs
-        function blockUrls(window) {
-            const observer = new window.MutationObserver((mutations) => {
+        function blockUrls(popup) {
+            const observer = new popup.MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     const elements = mutation.addedNodes;
                     elements.forEach((element) => {
@@ -36,21 +35,23 @@
                 });
             });
 
-            observer.observe(window.document.body, { childList: true, subtree: true });
+            observer.observe(popup.document.body, { childList: true, subtree: true });
         }
 
         // Function to prevent extensions from running
-        function disableExtensions(window) {
+        function disableExtensions(popup) {
             // Block known extension elements
             const extensionSelectors = [
                 '[id^="chrome-extension"]',
-                '[class^="chrome-extension"]'
+                '[class^="chrome-extension"]',
+                '[id*="smoothwall"]',
+                '[class*="smoothwall"]'
             ];
 
-            const observer = new window.MutationObserver((mutations) => {
+            const observer = new popup.MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     extensionSelectors.forEach((selector) => {
-                        const elements = window.document.querySelectorAll(selector);
+                        const elements = popup.document.querySelectorAll(selector);
                         elements.forEach((element) => {
                             element.parentNode.removeChild(element);
                             console.log(`Removed extension element: ${element}`);
@@ -59,19 +60,28 @@
                 });
             });
 
-            observer.observe(window.document.documentElement, { childList: true, subtree: true });
+            observer.observe(popup.document.documentElement, { childList: true, subtree: true });
         }
 
-        // Function to open a new popup window with a custom URL
+        // Function to open a new popup window
         function openPopup() {
-            const url = document.getElementById("url").value;
-            if (!url) {
-                alert("Please enter a valid URL.");
-                return;
-            }
-
-            const popup = window.open(url, "Popup", "width=600,height=400");
+            const popup = window.open("", "Popup", "width=600,height=400");
             if (popup) {
+                popup.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Blocked Popup</title>
+                    </head>
+                    <body>
+                        <h1>Popup with Blocked URLs and Disabled Extensions</h1>
+                        <p>This popup blocks certain URLs and attempts to disable browser extensions from modifying the content.</p>
+                    </body>
+                    </html>
+                `);
+
                 // Apply blocking and extension disabling functions in the popup
                 popup.document.addEventListener('DOMContentLoaded', () => {
                     blockUrls(popup);
