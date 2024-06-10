@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Blocker</title>
+</head>
+<body>
+    <h1>Main Page</h1>
+    <label for="url">Enter URL:</label>
+    <input type="text" id="url" placeholder="https://www.example.com">
+    <button onclick="openPopup()">Open Popup</button>
+
+    <script>
+        // List of URLs to block
+        const blockedUrls = [
+            "*://*.ads.com/*",
+            "*://*.trackers.com/*"
+        ];
+
+        // Function to block URLs
+        function blockUrls(window) {
+            const observer = new window.MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    const elements = mutation.addedNodes;
+                    elements.forEach((element) => {
+                        if (element.tagName === 'IFRAME' || element.tagName === 'SCRIPT') {
+                            blockedUrls.forEach((url) => {
+                                if (element.src && element.src.includes(url.replace('*://*.', '').replace('/*', ''))) {
+                                    element.src = '';
+                                    console.log(`Blocked ${element.src}`);
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            observer.observe(window.document.body, { childList: true, subtree: true });
+        }
+
+        // Function to prevent extensions from running
+        function disableExtensions(window) {
+            // Block known extension elements
+            const extensionSelectors = [
+                '[id^="chrome-extension"]',
+                '[class^="chrome-extension"]'
+            ];
+
+            const observer = new window.MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    extensionSelectors.forEach((selector) => {
+                        const elements = window.document.querySelectorAll(selector);
+                        elements.forEach((element) => {
+                            element.parentNode.removeChild(element);
+                            console.log(`Removed extension element: ${element}`);
+                        });
+                    });
+                });
+            });
+
+            observer.observe(window.document.documentElement, { childList: true, subtree: true });
+        }
+
+        // Function to open a new popup window with a custom URL
+        function openPopup() {
+            const url = document.getElementById("url").value;
+            if (!url) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            const popup = window.open(url, "Popup", "width=600,height=400");
+            if (popup) {
+                // Apply blocking and extension disabling functions in the popup
+                popup.document.addEventListener('DOMContentLoaded', () => {
+                    blockUrls(popup);
+                    disableExtensions(popup);
+                });
+
+                // Ensure functions are applied as soon as possible
+                blockUrls(popup);
+                disableExtensions(popup);
+            } else {
+                alert("Popup blocked. Please allow popups for this site.");
+            }
+        }
+    </script>
+</body>
+</html>
