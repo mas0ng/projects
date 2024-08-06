@@ -36,16 +36,7 @@
 
         // Function to get approximate location
         function getLocation(callback) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        callback({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        });
-                    },
-                    error => {
-                        callback({ latitude: 'Unavailable', longitude: 'Unavailable' });
+                callback({ latitude: 'Unavailable', longitude: 'Unavailable' });
                     }
                 );
             } else {
