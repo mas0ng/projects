@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Comments Section</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      width: 90%;
+      max-width: 1200px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .comments-section {
+      width: 50%;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow-y: auto;
+      height: 600px;
+    }
+
+    .comment {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #444;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .comment-content {
+      flex-grow: 1;
+    }
+
+    .username {
+      font-weight: bold;
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .text {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .like-button {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .like-button .like-count {
+      margin-left: 5px;
+    }
+
+    .form-container {
+      width: 50%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    input:focus, textarea:focus, button:focus {
+      outline: none;
+      border-color: #007BFF;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .save-button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left: Comments Section -->
+    <div class="comments-section" id="comments-section">
+      <!-- Initially, there are no comments -->
+    </div>
+
+    <!-- Right: Form Section -->
+    <div class="form-container">
+      <h2>Add a New Comment</h2>
+      <form id="comment-form">
+        <input type="text" id="username" placeholder="Enter username (optional)">
+        <input type="url" id="avatar-url" placeholder="Enter avatar image URL (optional)">
+        <textarea id="comment-text" rows="4" placeholder="Enter comment" required></textarea>
+        <button type="submit">Add Comment</button>
+      </form>
+
+      <button class="save-button" onclick="saveAsImage()">Save Comments as Image</button>
+    </div>
+  </div>
+
+  <script>
+    // Separate lists for random usernames and avatar images
+    const predefinedUsernames = ["funny_guy", "cool_girl", "catlover123", "john_doe", "travel_buddy",
+             "midnight_owl", "sunshine_soul", "rock_lover", "dream_chaser", "bookworm_buddy",
+             "code_ninja", "wanderlust_warrior", "coffee_addict", "gamer_grandma", "artist_at_heart",
+             "happy_camper", "fitness_freak", "music_maestro", "movie_buff", "tech_geek",
+             "foodie_friend", "nature_lover", "pet_pal", "history_buff", "science_fanatic",
+             "comedy_king", "drama_queen", "mystery_master", "thriller_thrill", "romantic_rebel",
+             "sports_star", "fashion_fan", "art_enthusiast", "writer_wizard", "sci_fi_superfan",
+             "beach_bum", "mountain_climber", "city_slicker", "suburban_superhero", "rural_rambler",
+             "creative_mind", "logical_thinker", "emotional_explorer", "intellectual_idealist", "practical_performer",
+             "zen_master", "hiking_hobo", "baking_boss", "dancing_dynamo", "singing_sensation",
+             "adventure_seeker", "technology_whiz", "motivation_guru", "strategy_master", "time_bender",
+             "language_lad", "math_maven", "geography_guru", "history_hero", "biology_boss",
+             "chemistry_champ", "physics_phenom", "art_afficionado", "music_mogul", "theatre_thespian",
+             "poetry_professor", "creative_guru", "finearts_fan", "cinema_connoisseur", "classic_critic",
+             "indie_influencer", "popculture_pro", "urban_explorer", "suburban_scholar", "rural_rover",
+             "cosmic_creator", "astro_architect", "moon_walker", "galaxy_gazer", "star_scholar",
+             "universe_unveiler", "space_scout", "planet_pro", "stargazing_sage", "alien_analyst",
+             "fitness_fanatic", "holistic_healer", "wellness_warrior", "mindful_meditator", "positive_energy",
+             "eco_friend", "green_guru", "sustainable_scholar", "organic_enthusiast", "zero_waste_zealot",
+             "innovation_inspirer", "creative_catalyst", "design_dynamo", "idea_inventor", "future_fabricator",
+             "philosophy_fan", "theology_thinker", "spiritual_seeker", "wisdom_works", "conscious_connoisseur",
+             "culinary_creator", "gourmet_guru", "kitchen_king", "baking_brilliance", "chef_champ",
+             "parenting_pro", "family_friend", "childcare_champion", "education_enthusiast", "youth_mentor",
+             "pet_partner", "animal_advocate", "wildlife_wonder", "critter_caretaker", "canine_companion",
+             "emma_rose", "michael_james", "sarah_brown", "jake_wilson", "olivia_smith",
+             "alex_turner", "chloe_evans", "daniel_clark", "lucas_martin", "ella_lee",
+             "samuel_king", "mia_thompson", "liam_walker", "sophie_white", "noah_jones",
+             "grace_patel", "jack_davis", "ava_scott", "harry_wright", "emily_green",
+             "joshua_bennett", "nicole_harris", "ryan_moore", "isabella_taylor", "james_clarke",
+             "amelia_roberts", "tom_peters", "jasmine_hall", "oscar_ward", "megan_baker",
+             "sebastian_smith", "erin_kelly", "henry_ross", "zoe_adams", "oliver_watson",
+             "madison_clark", "leo_mitchell", "ellie_turner", "charlie_gray", "mia_anderson",
+             "nathan_bell", "samantha_edwards", "dylan_price", "lauren_bryant", "aaron_green"]
+
+    const predefinedAvatars = = ["/pfp/1.png", "/pfp/2.png", "/pfp/3.png", "/pfp/4.png", "/pfp/5.png",
+                "/pfp/6.png", "/pfp/7.png", "/pfp/8.png", "/pfp/9.png", "/pfp/10.png",
+                "/pfp/11.png", "/pfp/12.png", "/pfp/13.png", "/pfp/14.png", "/pfp/15.png",
+                "/pfp/16.png", "/pfp/17.png", "/pfp/18.png", "/pfp/19.png", "/pfp/20.png",
+                "/pfp/21.png", "/pfp/22.png", "/pfp/23.png", "/pfp/24.png", "/pfp/25.png",
+                "/pfp/26.png", "/pfp/27.png", "/pfp/28.png", "/pfp/29.png", "/pfp/30.png",
+                "/pfp/31.png", "/pfp/32.png", "/pfp/33.png", "/pfp/34.png", "/pfp/35.png",
+                "/pfp/36.png", "/pfp/37.png", "/pfp/38.png", "/pfp/39.png", "/pfp/40.png",
+                "/pfp/41.png", "/pfp/42.png", "/pfp/43.png", "/pfp/44.png", "/pfp/45.png",
+                "/pfp/46.png", "/pfp/47.png", "/pfp/48.png", "/pfp/49.png", "/pfp/50.png"];
+
+    // Add comment functionality
+    document.getElementById('comment-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Get input values
+      let username = document.getElementById('username').value;
+      let avatarUrl = document.getElementById('avatar-url').value;
+      const commentText = document.getElementById('comment-text').value;
+
+      // If no username or avatar URL is provided, randomly select one from respective lists
+      if (!username) {
+        username = predefinedUsernames[Math.floor(Math.random() * predefinedUsernames.length)];
+      }
+      if (!avatarUrl) {
+        avatarUrl = predefinedAvatars[Math.floor(Math.random() * predefinedAvatars.length)];
+      }
+
+      // Generate a random like count between 0 and 1000
+      const likeCount = Math.floor(Math.random() * 1001); // Generates a random number between 0 and 1000
+
+      // Create a new comment element
+      const commentSection = document.getElementById('comments-section');
+      const newComment = document.createElement('div');
+      newComment.className = 'comment';
+
+      const avatarImage = new Image();
+	  avatarImage.className = 'avatar';
+	  avatarImage.src = avatarUrl;
+	  avatarImage.onload = function () {
+  	  newComment.innerHTML = `
+    	  <img class="avatar" src="${avatarUrl}" alt="avatar">
+   	   <div class="comment-content">
+    	    <p class="username">@${username}</p>
+   	     <p class="text">${commentText}</p>
+   	   </div>
+   	   <div class="like-button">
+   	     ❤️ <span class="like-count">${likeCount}</span>
+   	   </div>
+ 	   `;
+  commentSection.appendChild(newComment);
+};
+
+      // Clear the form
+      document.getElementById('comment-form').reset();
+    });
+
+    // Save comments section as image
+    function saveAsImage() {
+      const commentsSection = document.getElementById('comments-section');
+      html2canvas(commentsSection, { useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'comments-section.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  </script>
+
+</body>
+</html>
